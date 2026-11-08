@@ -1,8 +1,7 @@
-# Algorithms and Data Structures in Rust 🦀
-
+# Algorithms and Data Structures in Rust 
 A collection of data structures and algorithms implemented from scratch in **Rust** to explore memory management, time/space complexity, and core computer science fundamentals.
 
-## 📂 Repository Structure
+## Repository Structure
 
 Each folder is a standalone Cargo project containing the implementation and test cases for a specific topic:
 
