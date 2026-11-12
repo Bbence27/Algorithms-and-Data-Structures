@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::{BufWriter, Write};
 
 
+#[derive(Clone, Copy)]
 struct Point {
     x: f32,
     y: f32,
@@ -38,17 +39,11 @@ fn load_mesh(filename: &str) -> Mesh {
         .expect("mesh file is missing its triangle count")
         .parse::<usize>()
         .unwrap_or_else(|error| panic!("invalid triangle count in '{filename}': {error}"));
-
-    let mut mesh = Mesh {
-        triangles: Vec::with_capacity(triangle_count),
-    };
+    
+    let mut triangles: Vec<Triangle> = Vec::with_capacity(triangle_count);
 
     for _ in 0..triangle_count {
-        let mut triangle: Triangle = [
-            Point { x: 0.0, y: 0.0, z: 0.0 },
-            Point { x: 0.0, y: 0.0, z: 0.0 },
-            Point { x: 0.0, y: 0.0, z: 0.0 },
-        ];
+        let mut triangle = [Point { x: 0.0, y: 0.0, z: 0.0 }; 3];
         for p in 0..3 {
             let x = values
                 .next()
@@ -65,32 +60,48 @@ fn load_mesh(filename: &str) -> Mesh {
                 .expect("mesh file is missing a vertex coordinate")
                 .parse::<f32>()
                 .expect("mesh vertex coordinate is not a valid number");  
-            triangle[p] = Point { x, y, z}
+            triangle[p] = Point { x, y, z };
         }
-
-        mesh.triangles.push(triangle);
+        triangles.push(triangle);
     }
-    mesh
+    Mesh { triangles }
 }
 
 fn free_mesh(mesh: &mut Mesh) {
-    // TODO
     mesh.triangles.clear();
+    mesh.triangles.shrink_to_fit();
 }
 
 fn save_to_file(mesh: &Mesh, filename: &str) {
     let file = File::create(filename)
         .unwrap_or_else(|error| panic!("failed to create mesh file '{filename}': {error}"));
     let mut writer = BufWriter::new(file);
-    let _ = mesh;
-    writeln!(writer, "{}", 1).expect("failed to write triangle count");
-    writeln!(writer, "{} {} {}", 1.0, 2.0, 3.0).expect("failed to write vertex coordinates");
+    writeln!(writer, "{}", mesh.triangles.len()).expect("failed to write triangle count");
+    for triangle in &mesh.triangles {
+        write!(writer, "{:.6} {:.6} {:.6}", triangle[0].x, triangle[0].y, triangle[0].z).expect("failed to write vertex coordinates");
+        write!(writer, "{:.6} {:.6} {:.6}", triangle[1].x, triangle[1].y, triangle[1].z).expect("failed to write vertex coordinates");
+        write!(writer, "{:.6} {:.6} {:.6}", triangle[2].x, triangle[2].y, triangle[2].z).expect("failed to write vertex coordinates");
+        writeln!(writer).expect("failed to write newline");
+    }
 }
 
 fn closest_triangles(mesh: &Mesh, p: Point, count: usize) -> Mesh {
-    // TODO
-    let _ = (mesh, p, count);
-    todo!()
+    let mut triangle_distances: Vec<(Triangle, f32)> = Vec::with_capacity(mesh.triangles.len());
+
+    for triangle in &mesh.triangles {
+        let distance = distance_pt(p, *triangle);
+        triangle_distances.push((*triangle, distance));
+    }
+    
+    triangle_distances.sort_by(|a, b| a.1.total_cmp(&b.1));
+
+    let mut closest_triangles: Vec<Triangle> = Vec::with_capacity(count);
+    for (triangle, _) in triangle_distances.iter().take(count) {
+        closest_triangles.push(*triangle);
+    }
+
+    Mesh { triangles: closest_triangles }
+
 }
 
 fn main() {
