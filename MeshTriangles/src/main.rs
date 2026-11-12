@@ -78,10 +78,38 @@ fn save_to_file(mesh: &Mesh, filename: &str) {
     let mut writer = BufWriter::new(file);
     writeln!(writer, "{}", mesh.triangles.len()).expect("failed to write triangle count");
     for triangle in &mesh.triangles {
-        write!(writer, "{:.6} {:.6} {:.6}", triangle[0].x, triangle[0].y, triangle[0].z).expect("failed to write vertex coordinates");
-        write!(writer, "{:.6} {:.6} {:.6}", triangle[1].x, triangle[1].y, triangle[1].z).expect("failed to write vertex coordinates");
-        write!(writer, "{:.6} {:.6} {:.6}", triangle[2].x, triangle[2].y, triangle[2].z).expect("failed to write vertex coordinates");
+        write!(writer, "{:.6} {:.6} {:.6} ", triangle[0].x, triangle[0].y, triangle[0].z).expect("failed to write vertex coordinates");
+        write!(writer, "{:.6} {:.6} {:.6} ", triangle[1].x, triangle[1].y, triangle[1].z).expect("failed to write vertex coordinates");
+        write!(writer, "{:.6} {:.6} {:.6} ", triangle[2].x, triangle[2].y, triangle[2].z).expect("failed to write vertex coordinates");
         writeln!(writer).expect("failed to write newline");
+    }
+}
+
+fn partition(items: &mut [(Triangle, f32)]) -> usize{
+    let pivot = items.len() / 2;
+    let last = items.len() - 1;
+    items.swap(pivot, last);
+    let pivot_distance = items[last].1;
+    let mut first_larger = 0;
+    for i in 0..last{
+        if items[i].1 < pivot_distance {
+            items.swap(i, first_larger);
+            first_larger += 1;
+        }
+    }
+    items.swap(first_larger, last);
+    first_larger
+}
+
+fn quick_sort_left_k(items: &mut [(Triangle, f32)], k: usize) {
+    let pivot = partition(items);
+    if items.len() <= 1 || k == 0 || k >= items.len() {
+        return;
+    }
+    if pivot < k - 1 {
+        quick_sort_left_k(&mut items[pivot + 1..], k - pivot - 1);
+    } else if pivot > k {
+        quick_sort_left_k(&mut items[..pivot], k);
     }
 }
 
@@ -92,8 +120,8 @@ fn closest_triangles(mesh: &Mesh, p: Point, count: usize) -> Mesh {
         let distance = distance_pt(p, *triangle);
         triangle_distances.push((*triangle, distance));
     }
-    
-    triangle_distances.sort_by(|a, b| a.1.total_cmp(&b.1));
+
+    quick_sort_left_k(&mut triangle_distances, count);
 
     let mut closest_triangles: Vec<Triangle> = Vec::with_capacity(count);
     for (triangle, _) in triangle_distances.iter().take(count) {
