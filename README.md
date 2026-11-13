@@ -7,3 +7,4 @@ Each folder is a standalone Cargo project containing the implementation and test
 
 | [`GapBuffer/`](./GapBuffer) | **Gap Buffer** | Dynamic array for efficient text editor cursor insertions and deletions (`O(1)` amortized at cursor) |<br />
 | [`MeshTriangles/`](./MeshTriangles) | 3D Mesh Triangle Culling | Filters the $k$ closest 3D triangles to a camera viewpoint using sorting / Top-$k$ selection ($O(n \log n)$ / $O(n)$) |
+| [`RustyBunny/`](./RustyyBunny) | **Mesh Rust Simulation** | Simulates rust spreading day-by-day across a 3D mesh using a Dual Graph adjacency list and Level-Order Breadth-First Search (BFS) ($O(V + E)$). |
