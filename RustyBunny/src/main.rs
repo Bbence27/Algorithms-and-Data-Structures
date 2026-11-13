@@ -80,7 +80,7 @@ fn partition_edges(edges: &mut [(Point, Point, u32)]) -> usize {
     let pivot = edges.len() / 2;
     let last = edges.len() - 1;
     edges.swap(pivot, last);
-    let pivot_edge = edges[last]; // Copy the pivot tuple so we can compare against it
+    let pivot_edge = edges[last]; 
     
     let mut first_larger = 0;
     for i in 0..last {
