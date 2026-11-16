@@ -53,6 +53,12 @@ fn move_right(gb: &mut GapBuffer) {
 }
 
 fn backspace(gb: &mut GapBuffer) {
+    if gb.left == 0{
+        return;
+    }
+    unsafe{
+        *gb.data.add(gb.left) = '\0';
+    }
     
 }
 
