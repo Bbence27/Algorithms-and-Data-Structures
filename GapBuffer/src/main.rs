@@ -7,6 +7,25 @@ struct GapBuffer {
     data: *mut char, 
 }
 
+impl GapBuffer {
+    fn resize(&mut self){
+        let new_data_place = alloc::alloc_char(self.capacity*2);
+        for i in 0..self.left{
+            unsafe {
+                *new_data_place.add(i) = *self.data.add(i);
+            }
+        }
+        for c in self.right..self.capacity{
+            unsafe {
+                *new_data_place.add(c) = *self.data.add(c);
+            }
+        }
+        alloc::dealloc_char(self.data, self.capacity);
+        self.data = new_data_place;
+        self.right += self.capacity;
+        self.capacity = self.capacity * 2;
+    }
+}
 fn initialize_buffer(size: usize) -> GapBuffer {
     GapBuffer {
         left: 0,
@@ -17,10 +36,13 @@ fn initialize_buffer(size: usize) -> GapBuffer {
 }
 
 fn debug(gb: &GapBuffer) {
-    // TODO
+    println!("{:?}", gb.data)
 }
 
 fn type_char(gb: &mut GapBuffer, c: char) {
+    if gb.left == gb.right{
+        gb.resize();
+    }
     unsafe{
         *gb.data.add(gb.left) = c;
     }
