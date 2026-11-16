@@ -1,4 +1,4 @@
-use std::alloc::alloc;
+mod alloc;
 
 struct GapBuffer {
     left: usize,
@@ -12,7 +12,7 @@ fn initialize_buffer(size: usize) -> GapBuffer {
         left: 0,
         right: size,
         capacity: size,
-        data: alloc_char(size),
+        data: alloc::alloc_char(size),
     }
 }
 
@@ -21,7 +21,10 @@ fn debug(gb: &GapBuffer) {
 }
 
 fn type_char(gb: &mut GapBuffer, c: char) {
-    // TODO - must be O(1) amortized
+    unsafe{
+        *gb.data.add(gb.left) = c;
+    }
+    move_right(gb);
 }
 
 fn insert_text(gb: &mut GapBuffer, text: &str) {
