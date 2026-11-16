@@ -17,7 +17,7 @@ impl GapBuffer {
         }
         for c in self.right..self.capacity{
             unsafe {
-                *new_data_place.add(c) = *self.data.add(c);
+                *new_data_place.add(c + self.capacity) = *self.data.add(c);
             }
         }
         alloc::dealloc_char(self.data, self.capacity);
@@ -36,7 +36,20 @@ fn initialize_buffer(size: usize) -> GapBuffer {
 }
 
 fn debug(gb: &GapBuffer) {
-    println!("{:?}", gb.data)
+    for i in 0..gb.left{
+        unsafe {
+            print!("{:?}", *gb.data.add(i))
+        }
+    }
+    for _ in 0..gb.right-gb.left{
+        print!("_")
+    }
+    for c in gb.right..gb.capacity{
+        unsafe {
+            print!("{:?}", *gb.data.add(c))
+        }
+    }
+    println!("")
 }
 
 fn type_char(gb: &mut GapBuffer, c: char) {
@@ -46,7 +59,7 @@ fn type_char(gb: &mut GapBuffer, c: char) {
     unsafe{
         *gb.data.add(gb.left) = c;
     }
-    move_right(gb);
+    gb.left += 1;
 }
 
 fn insert_text(gb: &mut GapBuffer, text: &str) {
@@ -70,20 +83,19 @@ fn move_right(gb: &mut GapBuffer) {
     if gb.right == gb.capacity {
         return;
     }
-    gb.left += 1;
-    gb.right += 1;
+    
     unsafe {
         *gb.data.add(gb.left) = *gb.data.add(gb.right);
     }
+    gb.left += 1;
+    gb.right += 1;
 }
 
 fn backspace(gb: &mut GapBuffer) {
     if gb.left == 0{
         return;
     }
-    unsafe{
-        *gb.data.add(gb.left) = '\0';
-    }
+    gb.left -= 1
     
 }
 
