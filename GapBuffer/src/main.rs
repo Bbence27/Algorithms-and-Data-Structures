@@ -1,4 +1,4 @@
-use std::{format, print};
+use std::{print};
 
 mod alloc;
 
