@@ -1,3 +1,5 @@
+use std::{format, print};
+
 mod alloc;
 
 struct GapBuffer {
@@ -36,19 +38,25 @@ fn initialize_buffer(size: usize) -> GapBuffer {
 }
 
 fn debug(gb: &GapBuffer) {
+    let mut left_string = String::new();
+    let middle_string = "_".repeat(gb.right-gb.left);
+    let mut right_string = String::new();
+
     for i in 0..gb.left{
         unsafe {
-            print!("{:?}", *gb.data.add(i))
+            left_string = [left_string, (*gb.data.add(i)).to_string()].concat();
         }
     }
-    for _ in 0..gb.right-gb.left{
-        print!("_")
-    }
+    
     for c in gb.right..gb.capacity{
         unsafe {
-            print!("{:?}", *gb.data.add(c))
+            right_string = [right_string, (*gb.data.add(c)).to_string()].concat();
         }
     }
+    
+    let output_string = [left_string,middle_string,right_string].concat();
+    print!("{:?}",output_string);
+
     println!("")
 }
 
